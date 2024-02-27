@@ -15,7 +15,9 @@ export default function ColorSchemeToggle() {
 				<Switch onValueChange={toggleColorScheme} value={colorScheme === 'dark'} />
 			</View>
 			<View className="flex w-full text-left">
-				<Text muted>Switch to {colorScheme === 'dark' ? 'light' : 'dark'} theme</Text>
+				<Text muted size="sm">
+					Switch to {colorScheme === 'dark' ? 'light' : 'dark'} theme
+				</Text>
 			</View>
 		</View>
 	)

@@ -109,8 +109,6 @@ export function useUserPreferences(
 
 type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUser>
 export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
-	updateViewer
-
 	const { mutateAsync, isLoading, error } = useMutation(
 		[userQueryKeys.updateUser, id],
 		async (params: UpdateUser) => {

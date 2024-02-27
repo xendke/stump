@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
+import { View } from './components'
 import { AuthenticatedNavigator } from './screens/authenticated'
 import LoginOrClaim from './screens/LoginOrClaim'
 import ServerNotAccessible from './screens/ServerNotAccessible'
@@ -122,9 +123,11 @@ export default function AppWrapper() {
 
 	return (
 		<SafeAreaProvider>
-			<NavigationContainer>
-				<Stack.Navigator>{renderApp()}</Stack.Navigator>
-			</NavigationContainer>
+			<View className="flex-1 dark:bg-gray-950">
+				<NavigationContainer>
+					<Stack.Navigator>{renderApp()}</Stack.Navigator>
+				</NavigationContainer>
+			</View>
 		</SafeAreaProvider>
 	)
 }

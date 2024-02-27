@@ -1,2 +1,2 @@
-export { default as AccountSettings } from './AccountSettings'
+export { AccountSettings } from './account'
 export { default as AppearanceSettings } from './AppearanceSettings'
