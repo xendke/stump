@@ -14,9 +14,13 @@ type ScreenRootViewProps = StyledProps<ViewProps> & {
 	classes?: string
 	disabledBottomInset?: boolean
 	applyPadding?: boolean
+	hideStatusBar?: boolean
 }
 export const ScreenRootView = forwardRef<typeof NativeView, ScreenRootViewProps>(
-	({ className, children, classes, disabledBottomInset, applyPadding, ...props }, ref) => {
+	(
+		{ className, children, classes, disabledBottomInset, applyPadding, hideStatusBar, ...props },
+		ref,
+	) => {
 		const { colorScheme } = useColorScheme()
 		const insets = useSafeAreaInsets()
 
@@ -43,7 +47,11 @@ export const ScreenRootView = forwardRef<typeof NativeView, ScreenRootViewProps>
 				ref={ref}
 			>
 				{children}
-				<StatusBar key={colorScheme} style={colorScheme === 'dark' ? 'light' : 'dark'} />
+				<StatusBar
+					key={colorScheme}
+					style={colorScheme === 'dark' ? 'light' : 'dark'}
+					hidden={hideStatusBar}
+				/>
 			</View>
 		)
 	},

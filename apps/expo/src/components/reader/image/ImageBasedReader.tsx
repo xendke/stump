@@ -104,9 +104,12 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 	)
 
 	return (
-		<ReaderContainer>
+		<ReaderContainer book={book}>
 			<FlatList
-				style={{ backgroundColor: colorScheme === 'dark' ? gray[950] : undefined }}
+				style={{
+					backgroundColor: colorScheme === 'dark' ? gray[950] : undefined,
+					position: 'absolute',
+				}}
 				data={Array.from({ length: book.pages }, (_, i) => i)}
 				renderItem={({ item }) => (
 					<Page
@@ -135,7 +138,8 @@ export default function ImageBasedReader({ book, initialPage, incognito }: Props
 				}}
 				initialNumToRender={10}
 				maxToRenderPerBatch={10}
-				initialScrollIndex={initialPage - 1}
+				// FIXME: buggy on Android
+				// initialScrollIndex={initialPage - 1}
 			/>
 		</ReaderContainer>
 	)
