@@ -27,7 +27,7 @@ export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
 
 export type PersistedJob = { id: string; name: string; description: string | null; status: JobStatus; output_data: CoreJobOutput | null; ms_elapsed: BigInt; created_at: string; completed_at: string | null; logs?: Log[] | null }
 
-export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | unknown
+export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput
 
 /**
  * An update event that is emitted by a job
@@ -60,13 +60,54 @@ export type User = { id: string; username: string; is_server_owner: boolean; ava
  * Permissions that can be granted to a user. Some permissions are implied by others,
  * and will be automatically granted if the "parent" permission is granted.
  */
-export type UserPermission = "bookclub:read" | "bookclub:create" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
+export type UserPermission = "bookclub:read" | "bookclub:create" | "emailer:read" | "emailer:create" | "emailer:manage" | "email:send" | "email:arbitrary_send" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
-export type UserPreferences = { id: string; locale: string; app_theme: string; show_query_indicator: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean; show_thumbnails_in_headers?: boolean }
+export type NavigationMode = "SIDEBAR" | "TOPBAR"
+
+export type HomeItem = { type: "ContinueReading" } | { type: "RecentlyAddedBooks" } | { type: "RecentlyAddedSeries" } | { type: "Library"; library_id: string } | { type: "SmartList"; smart_list_id: string }
+
+export type NaviationItemDisplayOptions = { show_create_action?: boolean; show_link_to_all?: boolean }
+
+export type NavigationItem = { type: "Home" } | { type: "Explore" } | ({ type: "Libraries" } & NaviationItemDisplayOptions) | ({ type: "SmartLists" } & NaviationItemDisplayOptions) | ({ type: "BookClubs" } & NaviationItemDisplayOptions)
+
+export type ArrangementItem<I> = { item: I; visible?: boolean }
+
+export type Arrangement<I> = { locked: boolean; items: ArrangementItem<I>[] }
+
+export type UserPreferences = { id: string; locale: string; app_theme: string; show_query_indicator: boolean; enable_live_refetch?: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean; show_thumbnails_in_headers?: boolean; navigation_arrangement?: Arrangement<NavigationItem>; home_arrangement?: Arrangement<HomeItem> }
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
+
+export type EmailerSendTo = { device_id: number } | { email: string }
+
+/**
+ * The config for an SMTP emailer
+ */
+export type EmailerConfig = { sender_email: string; sender_display_name: string; username: string; smtp_host: string; smtp_port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
+
+export type EmailerClientConfig = { sender_email: string; sender_display_name: string; username: string; password: string; host: string; port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
+
+/**
+ * An SMTP emailer entity, which stores SMTP configuration data to be used for sending emails.
+ * 
+ * will be configurable. This will be expanded in the future.
+ */
+export type SMTPEmailer = { id: number; name: string; is_primary: boolean; config: EmailerConfig; last_used_at: string | null }
+
+export type RegisteredEmailDevice = { id: number; name: string; email: string; forbidden: boolean }
+
+/**
+ * A record of an email that was sent, used to keep track of emails that
+ * were sent by specific emailer(s)
+ */
+export type EmailerSendRecord = { id: number; emailer_id: number; recipient_email: string; attachment_meta: AttachmentMeta[] | null; sent_at: string; sent_by_user_id: string | null; sent_by?: User | null }
+
+/**
+ * The metadata of an attachment that was sent with an email
+ */
+export type AttachmentMeta = { filename: string; media_id: string | null; size: number }
 
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
@@ -233,6 +274,8 @@ export type Pagination = null | PageQuery | CursorQuery
 
 // SERVER TYPE GENERATION
 
+export type ClaimResponse = { is_claimed: boolean }
+
 export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type UpdateCheck = { current_semver: string; latest_semver: string; has_update_available: boolean }
@@ -243,11 +286,32 @@ export type CreateUser = { username: string; password: string; permissions?: Use
 
 export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
-export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; show_query_indicator: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean; show_thumbnails_in_headers: boolean }
+export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; show_query_indicator: boolean; enable_live_refetch: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean; show_thumbnails_in_headers: boolean }
 
 export type DeleteUser = { hard_delete: boolean | null }
 
-export type ClaimResponse = { is_claimed: boolean }
+export type EmailerIncludeParams = { include_send_history?: boolean }
+
+export type EmailerSendRecordIncludeParams = { include_sent_by?: boolean }
+
+export type SendAttachmentEmailsPayload = { media_ids: string[]; send_to: EmailerSendTo[] }
+
+export type SendAttachmentEmailResponse = { sent_emails_count: number; errors: string[] }
+
+/**
+ * Input object for creating or updating an emailer
+ */
+export type CreateOrUpdateEmailer = { name: string; is_primary: boolean; config: EmailerClientConfig }
+
+/**
+ * Input object for creating or updating an email device
+ */
+export type CreateOrUpdateEmailDevice = { name: string; email: string; forbidden: boolean }
+
+/**
+ * Patch an existing email device by its ID
+ */
+export type PatchEmailDevice = { name: string | null; email: string | null; forbidden: boolean | null }
 
 export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
 

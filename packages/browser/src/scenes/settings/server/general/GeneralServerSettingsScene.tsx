@@ -1,13 +1,14 @@
 import { useCheckForServerUpdate } from '@stump/client'
 import { Alert } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
-import { useLocaleContext } from '@/i18n'
 
 import ServerInfoSection from './ServerInfoSection'
+import ServerPublicURL from './ServerPublicURL'
 
 export default function GeneralServerSettingsScene() {
 	const { t } = useLocaleContext()
@@ -31,6 +32,7 @@ export default function GeneralServerSettingsScene() {
 					)}
 
 					<ServerInfoSection />
+					<ServerPublicURL />
 				</div>
 			</ContentContainer>
 		</SceneContainer>

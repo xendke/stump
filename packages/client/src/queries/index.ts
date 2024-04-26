@@ -8,6 +8,18 @@ export {
 	useCreateBookClub,
 	useUpdateBookClub,
 } from './bookClub'
+export {
+	prefetchEmailerSendHistory,
+	useCreateEmailDevice,
+	useDeleteEmailDevice,
+	useEmailDevicesQuery,
+	useEmailerQuery,
+	useEmailerSendHistoryQuery,
+	useEmailersQuery,
+	useSendAttachmentEmail,
+	useUpdateEmailDevice,
+	useUpdateEmailer,
+} from './emailers'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export {
 	type DirectoryListingQueryParams,
@@ -34,6 +46,7 @@ export {
 export { useLogsQuery } from './log'
 export {
 	prefetchMedia,
+	prefetchPagedMedia,
 	useContinueReading,
 	useMediaByIdQuery,
 	useMediaCursorQuery,
@@ -43,6 +56,7 @@ export {
 } from './media'
 export {
 	prefetchLibrarySeries,
+	prefetchPagedSeries,
 	prefetchSeries,
 	usePagedSeriesQuery,
 	useSeriesByIdQuery,
@@ -67,6 +81,7 @@ export {
 	useCreateUser,
 	useDeleteUser,
 	useLoginActivityQuery,
+	useNavigationArrangement,
 	useUpdatePreferences,
 	useUpdateUser,
 	useUserPreferences,

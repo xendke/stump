@@ -342,15 +342,13 @@ pub async fn register(
 	// supported on the prisma client. Until then, this ugly mess is necessary.
 	let _user_preferences = db
 		.user_preferences()
-		.create(vec![user_preferences::user::connect(user::id::equals(
-			created_user.id.clone(),
-		))])
+		.create(vec![
+			user_preferences::user::connect(user::id::equals(created_user.id.clone())),
+			user_preferences::user_id::set(Some(created_user.id.clone())),
+		])
 		.exec()
 		.await?;
 
-	// This *really* shouldn't fail, so I am using expect here. It also doesn't
-	// matter too much in the long run since this query will go away once above fixme
-	// is resolved.
 	let user = db
 		.user()
 		.find_unique(user::id::equals(created_user.id))
@@ -358,7 +356,9 @@ pub async fn register(
 		.with(user::age_restriction::fetch())
 		.exec()
 		.await?
-		.expect("Failed to fetch user after registration.");
+		.ok_or(APIError::InternalServerError(
+			"Failed to fetch user after registration.".to_string(),
+		))?;
 
 	Ok(Json(user.into()))
 }

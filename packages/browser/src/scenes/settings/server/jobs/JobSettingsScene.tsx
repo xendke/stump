@@ -1,13 +1,12 @@
 import { useJobsQuery, useJobStore } from '@stump/client'
 import { Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { PaginationState } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import ContentContainer from '@/components/container/ContentContainer.tsx'
-import { useAppContext } from '@/context'
-import { useLocaleContext } from '@/i18n'
 
 import { JobSettingsContext } from './context.ts'
 import DeleteAllSection from './DeleteAllSection.tsx'
@@ -15,7 +14,6 @@ import JobScheduler from './JobScheduler.tsx'
 import JobTable from './JobTable.tsx'
 
 export default function JobSettingsScene() {
-	const { isServerOwner } = useAppContext()
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
 		pageSize: 10,
@@ -30,7 +28,6 @@ export default function JobSettingsScene() {
 		isRefetching,
 		pageData,
 	} = useJobsQuery({
-		enabled: isServerOwner,
 		page: pagination.pageIndex,
 		page_size: pagination.pageSize,
 		params: {

@@ -35,6 +35,11 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
+	// Initialize the encryption key, if it doesn't exist
+	core.init_encryption()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
 	core.init_journal_mode()
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
@@ -64,7 +69,7 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
 	tracing::info!("⚡️ Stump HTTP server starting on http://{}", addr);
 
-	// TODO: might need to refactor to use https://docs.rs/async-shutdown/latest/async_shutdown/
+	// TODO: Refactor to use https://docs.rs/async-shutdown/latest/async_shutdown/
 	let cleanup = || async move {
 		println!("Initializing graceful shutdown...");
 

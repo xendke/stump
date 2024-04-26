@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -19,10 +20,13 @@ impl From<prisma::age_restriction::Data> for AgeRestriction {
 	}
 }
 
+// TODO: consider separating some of the `manage` permissions into more granular permissions
 // TODO: consider adding self:update permission, useful for child accounts
 /// Permissions that can be granted to a user. Some permissions are implied by others,
 /// and will be automatically granted if the "parent" permission is granted.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq, Hash,
+)]
 pub enum UserPermission {
 	///TODO: Expand permissions for bookclub + smartlist
 	/// Grant access to the book club feature
@@ -31,6 +35,21 @@ pub enum UserPermission {
 	/// Grant access to create a book club (access book club)
 	#[serde(rename = "bookclub:create")]
 	CreateBookClub,
+	/// Grant access to read any emailers in the system
+	#[serde(rename = "emailer:read")]
+	EmailerRead,
+	/// Grant access to create an emailer
+	#[serde(rename = "emailer:create")]
+	EmailerCreate,
+	/// Grant access to manage an emailer
+	#[serde(rename = "emailer:manage")]
+	EmailerManage,
+	/// Grant access to send an email
+	#[serde(rename = "email:send")]
+	EmailSend,
+	/// Grant access to send an arbitrary email, bypassing any registered device requirements
+	#[serde(rename = "email:arbitrary_send")]
+	EmailArbitrarySend,
 	/// Grant access to access the smart list feature. This includes the ability to create and edit smart lists
 	#[serde(rename = "smartlist:read")]
 	AccessSmartList,
@@ -58,7 +77,6 @@ pub enum UserPermission {
 	/// Grant access to delete the library (manage library)
 	#[serde(rename = "library:delete")]
 	DeleteLibrary,
-	// TODO: ReadUsers, CreateUsers, ManageUsers
 	/// Grant access to read users.
 	///
 	/// Note that this is explicitly for querying users via user-specific endpoints.
@@ -91,6 +109,12 @@ impl UserPermission {
 	pub fn associated(&self) -> Vec<UserPermission> {
 		match self {
 			UserPermission::CreateBookClub => vec![UserPermission::AccessBookClub],
+			UserPermission::EmailerRead => vec![UserPermission::EmailSend],
+			UserPermission::EmailerCreate => vec![UserPermission::EmailerRead],
+			UserPermission::EmailerManage => {
+				vec![UserPermission::EmailerCreate, UserPermission::EmailerRead]
+			},
+			UserPermission::EmailArbitrarySend => vec![UserPermission::EmailSend],
 			UserPermission::CreateLibrary => {
 				vec![UserPermission::EditLibrary, UserPermission::ScanLibrary]
 			},
@@ -123,6 +147,11 @@ impl ToString for UserPermission {
 		match self {
 			UserPermission::AccessBookClub => "bookclub:read".to_string(),
 			UserPermission::CreateBookClub => "bookclub:create".to_string(),
+			UserPermission::EmailerRead => "emailer:read".to_string(),
+			UserPermission::EmailerCreate => "emailer:create".to_string(),
+			UserPermission::EmailerManage => "emailer:manage".to_string(),
+			UserPermission::EmailSend => "email:send".to_string(),
+			UserPermission::EmailArbitrarySend => "email:arbitrary_send".to_string(),
 			UserPermission::AccessSmartList => "smartlist:read".to_string(),
 			UserPermission::FileExplorer => "file:explorer".to_string(),
 			UserPermission::UploadFile => "file:upload".to_string(),
@@ -143,11 +172,17 @@ impl ToString for UserPermission {
 	}
 }
 
+// TODO: refactor to remove panic :grimace:
 impl From<&str> for UserPermission {
 	fn from(s: &str) -> UserPermission {
 		match s {
 			"bookclub:read" => UserPermission::AccessBookClub,
 			"bookclub:create" => UserPermission::CreateBookClub,
+			"emailer:read" => UserPermission::EmailerRead,
+			"emailer:create" => UserPermission::EmailerCreate,
+			"emailer:manage" => UserPermission::EmailerManage,
+			"email:send" => UserPermission::EmailSend,
+			"email:arbitrary_send" => UserPermission::EmailArbitrarySend,
 			"smartlist:read" => UserPermission::AccessSmartList,
 			"file:explorer" => UserPermission::FileExplorer,
 			"file:upload" => UserPermission::UploadFile,
@@ -164,7 +199,39 @@ impl From<&str> for UserPermission {
 			"notifier:manage" => UserPermission::ManageNotifier,
 			"notifier:delete" => UserPermission::DeleteNotifier,
 			"server:manage" => UserPermission::ManageServer,
+			// FIXME: Don't panic smh
 			_ => panic!("Invalid user permission: {}", s),
 		}
+	}
+}
+
+/// A wrapper around a Vec<UserPermission> used for including any associated permissions
+/// from the underlying permissions
+#[derive(Debug, Serialize, Deserialize, ToSchema, Type)]
+pub struct PermissionSet(Vec<UserPermission>);
+
+impl PermissionSet {
+	/// Unwrap the underlying Vec<UserPermission> and include any associated permissions
+	pub fn resolve_into_vec(self) -> Vec<UserPermission> {
+		self.0
+			.into_iter()
+			.flat_map(|permission| {
+				let mut v = vec![permission];
+				v.extend(permission.associated());
+				v
+			})
+			.unique()
+			.collect()
+	}
+}
+
+impl From<String> for PermissionSet {
+	fn from(s: String) -> PermissionSet {
+		let permissions = s
+			.split(',')
+			.map(|s| s.trim())
+			.map(UserPermission::from)
+			.collect();
+		PermissionSet(permissions)
 	}
 }

@@ -51,7 +51,7 @@ The following items are the major targets for Stump's first release:
 - 📃 Full OPDS + OPDS Page Streaming support
 - 📕 EPUB, PDF, and CBZ/CBR support
 - 📚 Organize libraries with collections and reading lists
-- 🔐 Role-based access-control with managed user accounts
+- 🔐 Granular access-control with managed user accounts
 - 🚀 Easy setup and deployment using Docker or bare metal
 - 👀 Fully responsive, built-in UI with a dark mode
 - 🏃 Low resource utilization with excellent performance
@@ -71,7 +71,7 @@ Feel free to reach out if you have anything else you'd like to see!
 
 ## Getting Started 🚀
 
-Stump isn't ready for normal usage yet. To give it a spin, it is reccommended to try the nightly [Docker image](https://hub.docker.com/r/aaronleopold/stump). If you're interested in development, or trying it from source, you can follow the [developer guide](#developer-guide-).
+Stump isn't ready for normal usage yet. To give it a spin, it is recommended to try the nightly [Docker image](https://hub.docker.com/r/aaronleopold/stump). If you're interested in development, or trying it from source, you can follow the [developer guide](#developer-guide-).
 
 For more information about getting started, check out the [guides](https://stumpapp.dev/guides) available on the Stump website.
 
@@ -129,14 +129,14 @@ And that's it!
 
 #### Where to start?
 
-If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/stumpapp/stump/issues). You can also check out the [milestones](https://github.com/stumpapp/stump/milestones) page for a more curated list of issues that need to be addressed.
+If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/stumpapp/stump/issues). You can also check out the [current project board](https://github.com/orgs/stumpapp/projects/4) to see what's actively being worked on or planned.
 
 In general, the following areas are good places to start:
 
 - Translation, so Stump is accessible to as many people as possible
-  - [Crowdin](https://crowdin.com/project/stump) is being used for translations
+  - [Crowdin](https://crowdin.com/project/stump) is used for translations
 - Writing comprehensive tests
-- Designing UI elements/sections or improving the existing UI/UX
+- Designing and/improving UI/UX
 - Docker build optimizations, caching, etc
 - CI pipelines, automated releases and release notes, etc
 - And lots more!
@@ -155,7 +155,7 @@ Stump has a monorepo structure managed by [yarn workspaces](https://yarnpkg.com/
 Stand-alone applications that can be run independently, at `/apps` in the root of the project:
 
 - `desktop`: A React + Tauri desktop application
-- `mobile`: A React Native application ([#125](https://github.com/stumpapp/stump/issues/125))
+- `expo`: A React Native application ([#125](https://github.com/stumpapp/stump/issues/125))
 - `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server
 - `web`: A React application, the primary UI for both the built-in web app the server serves and the desktop app
 

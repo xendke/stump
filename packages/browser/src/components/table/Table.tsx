@@ -4,6 +4,7 @@ import {
 	ColumnFiltersState,
 	flexRender,
 	getCoreRowModel,
+	getExpandedRowModel,
 	getFilteredRowModel,
 	getSortedRowModel,
 	SortDirection,
@@ -227,5 +228,28 @@ function SortIcon({ direction }: { direction: 'asc' | 'desc' | null }) {
 		return null
 	}
 
-	return <span className="ml-1.5">{direction === 'asc' ? <ArrowUp /> : <ArrowDown />}</span>
+	return (
+		<span className="ml-1.5 shrink-0">
+			{direction === 'asc' ? (
+				<ArrowUp className="h-3 w-3 text-muted" />
+			) : (
+				<ArrowDown className="h-3 w-3 text-muted" />
+			)}
+		</span>
+	)
 }
+
+export const getTableModels = ({
+	filtered,
+	expanded,
+	sorted,
+}: {
+	filtered?: boolean
+	expanded?: boolean
+	sorted?: boolean
+}) => ({
+	getCoreRowModel: getCoreRowModel(),
+	...(filtered ? { getFilteredRowModel: getFilteredRowModel() } : {}),
+	...(expanded ? { getExpandedRowModel: getExpandedRowModel(), getRowCanExpand: () => true } : {}),
+	...(sorted ? { getSortedRowModel: getSortedRowModel() } : {}),
+})

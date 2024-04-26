@@ -53,6 +53,16 @@ export function AppLayout() {
 	}, [location, storeUser])
 
 	/**
+	 * If enabled, the client will refetch certain queries to hydrate the UI with
+	 * new data. Otherwise, the client will wait for the job output before deciding
+	 * what data to refetch.
+	 */
+	const liveRefetch = useMemo(
+		() => (storeUser?.user_preferences ?? ({} as UserPreferences)).enable_live_refetch || false,
+		[storeUser],
+	)
+
+	/**
 	 * Whenever we are in a Stump reader, we remove all navigation elements from
 	 * the DOM
 	 */
@@ -64,7 +74,7 @@ export function AppLayout() {
 	const hideSidebar = hideAllNavigation || preferTopBar
 	const hideTopBar = isMobile || hideAllNavigation || !preferTopBar
 
-	useCoreEventHandler()
+	useCoreEventHandler({ liveRefetch })
 
 	/**
 	 * A callback to enforce a permission on the currently logged in user.
@@ -115,7 +125,9 @@ export function AppLayout() {
 				{!hideAllNavigation && <MobileTopBar />}
 				{!hideTopBar && <TopBar />}
 				<div className={cx('flex h-full flex-1', { 'pb-12': preferTopBar && !hideTopBar })}>
-					{!hideSidebar && <SideBar hidden={softHideSidebar} />}
+					<Suspense fallback={null}>
+						{!hideSidebar && <SideBar hidden={softHideSidebar} />}
+					</Suspense>
 					<main className="min-h-full w-full overflow-y-auto overflow-x-hidden bg-background">
 						<div className="relative flex h-full w-full flex-col">
 							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}

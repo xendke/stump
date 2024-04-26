@@ -1,10 +1,10 @@
 import { CheckBox, Heading, Label, Link, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { UserPermission } from '@stump/types'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 import z from 'zod'
 
-import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 import { Schema } from './CreateOrUpdateUserForm'
@@ -14,6 +14,7 @@ export const allPermissions = [
 	'bookclub:create',
 	'file:explorer',
 	'file:upload',
+	'file:download',
 	'library:create',
 	'library:edit',
 	'library:scan',
@@ -33,6 +34,7 @@ export const userPermissionSchema = z.enum(allPermissions)
 const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'bookclub:create': ['bookclub:read'],
 	'bookclub:read': [],
+	'file:download': [],
 	'file:explorer': [],
 	'file:upload': [],
 	'library:create': ['library:edit'],
