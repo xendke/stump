@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isUrl } from '@stump/api'
 import { useUpdateUser } from '@stump/client'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { TouchableOpacity } from 'react-native'
@@ -10,8 +11,11 @@ import { Input, Text, View } from '@/components'
 import { useUserStore } from '@/stores'
 
 export default function ProfileForm() {
+	const { t } = useLocaleContext()
 	const { user, setUser } = useUserStore((store) => ({ setUser: store.setUser, user: store.user }))
 	const { updateAsync } = useUpdateUser()
+
+	const schema = useMemo(() => createSchema(t), [t])
 	const {
 		control,
 		formState: { errors },
@@ -75,7 +79,7 @@ export default function ProfileForm() {
 						<Input
 							autoCorrect={false}
 							autoCapitalize="none"
-							placeholder="Username"
+							placeholder={t(getKey('labels.username'))}
 							onBlur={onBlur}
 							onChangeText={onChange}
 							value={value}
@@ -96,7 +100,7 @@ export default function ProfileForm() {
 							secureTextEntry
 							autoCorrect={false}
 							autoCapitalize="none"
-							placeholder="Password"
+							placeholder={t(getKey('labels.password'))}
 							onBlur={onBlur}
 							onChangeText={onChange}
 							value={value}
@@ -111,28 +115,32 @@ export default function ProfileForm() {
 				disabled={!hasChanges}
 				onPress={handleSubmit(onSubmit)}
 			>
-				<Text className="text-center">{'Save Changes'}</Text>
+				<Text className="text-center">{t(getKey('buttons.confirm'))}</Text>
 			</TouchableOpacity>
 		</View>
 	)
 }
 
-// TODO: when translations are available, move this into the component OR make a createSchema fn instead
-const schema = z.object({
-	avatarUrl: z
-		.string()
-		.optional()
-		.nullable()
-		.refine(
-			(url) => !url || isUrl(url),
-			() => ({
-				message: 'Invalid URL',
-			}),
-		),
-	name: z.string().optional(),
-	password: z.string().optional(),
-	username: z.string().min(1, {
-		message: 'Username must be at least 1 character',
-	}),
-})
-type FormValues = z.infer<typeof schema>
+const BASE_KEY = 'settingsScene.app/account.sections.account'
+const getKey = (key: string) => `${BASE_KEY}.${key}`
+const getValidationKey = (key: string) => getKey(`validation.${key}`)
+
+const createSchema = (t: (key: string) => string) =>
+	z.object({
+		avatarUrl: z
+			.string()
+			.optional()
+			.nullable()
+			.refine(
+				(url) => !url || isUrl(url),
+				() => ({
+					message: t(getValidationKey('avatarUrl')),
+				}),
+			),
+		name: z.string().optional(),
+		password: z.string().optional(),
+		username: z.string().min(1, {
+			message: t(getValidationKey('username')),
+		}),
+	})
+type FormValues = z.infer<ReturnType<typeof createSchema>>

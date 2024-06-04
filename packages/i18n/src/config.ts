@@ -140,6 +140,7 @@ function parseMissingKeyHandler(missingKey: string) {
 }
 
 i18n.use(initReactI18next).init({
+	compatibilityJSON: 'v3',
 	fallbackLng: 'en',
 	interpolation: {
 		escapeValue: false, // not needed for react as it escapes by default

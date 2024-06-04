@@ -2,8 +2,9 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { checkUrl, initializeApi, isAxiosError, isUrl } from '@stump/api'
 import { useAuthQuery } from '@stump/client'
+import { AllowedLocale, LocaleProvider } from '@stump/i18n'
 import * as SplashScreen from 'expo-splash-screen'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { View } from './components'
@@ -21,10 +22,13 @@ export default function AppWrapper() {
 		setPlatform: store.setPlatform,
 	}))
 
-	const { storeUser, setStoreUser } = useUserStore((state) => ({
+	const { storeUser, setStoreUser, preferences } = useUserStore((state) => ({
+		preferences: state.userPreferences,
 		setStoreUser: state.setUser,
 		storeUser: state.user,
 	}))
+	const locale = useMemo(() => (preferences?.locale || 'en') as AllowedLocale, [preferences])
+
 	const { isConnectedToServer, setIsConnectedToServer } = useAppStore((store) => ({
 		isConnectedToServer: store.isConnectedWithServer,
 		setIsConnectedToServer: store.setIsConnectedWithServer,
@@ -123,12 +127,14 @@ export default function AppWrapper() {
 	if (!isReady) return null
 
 	return (
-		<SafeAreaProvider>
-			<View className="flex-1 dark:bg-gray-950">
-				<NavigationContainer>
-					<Stack.Navigator>{renderApp()}</Stack.Navigator>
-				</NavigationContainer>
-			</View>
-		</SafeAreaProvider>
+		<LocaleProvider locale={locale}>
+			<SafeAreaProvider>
+				<View className="flex-1 dark:bg-gray-950">
+					<NavigationContainer>
+						<Stack.Navigator>{renderApp()}</Stack.Navigator>
+					</NavigationContainer>
+				</View>
+			</SafeAreaProvider>
+		</LocaleProvider>
 	)
 }
