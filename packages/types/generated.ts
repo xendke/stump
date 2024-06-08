@@ -87,6 +87,9 @@ export type EmailerSendTo = { device_id: number } | { email: string }
  */
 export type EmailerConfig = { sender_email: string; sender_display_name: string; username: string; smtp_host: string; smtp_port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
+/**
+ * The configuration for an [EmailerClient]
+ */
 export type EmailerClientConfig = { sender_email: string; sender_display_name: string; username: string; password: string; host: string; port: number; tls_enabled: boolean; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
 /**

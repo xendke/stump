@@ -14,3 +14,7 @@ export const gray = {
 	900: '#161719',
 	950: '#0F1011',
 }
+
+export const Colors = {
+	gray,
+}
