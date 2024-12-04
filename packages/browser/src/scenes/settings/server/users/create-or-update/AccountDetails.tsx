@@ -1,5 +1,5 @@
-import { Button, IconButton, Input } from '@stump/components'
-import { Eye, EyeOff, Shield } from 'lucide-react'
+import { CheckBox, IconButton, Input } from '@stump/components'
+import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
@@ -7,6 +7,7 @@ import { CreateOrUpdateUserSchema } from './schema'
 
 export default function AccountDetails() {
 	const form = useFormContext<CreateOrUpdateUserSchema>()
+	const [generatePassword] = form.watch(['generate_password'])
 	const { errors } = useFormState({ control: form.control })
 
 	const [passwordVisible, setPasswordVisible] = useState(false)
@@ -48,25 +49,16 @@ export default function AccountDetails() {
 			/>
 
 			<div className="flex items-center gap-1">
-				<Button
-					type="button"
-					onClick={() => form.setValue('password', generateRandomPassword())}
+				<CheckBox
+					id="generate_password"
 					data-testid="generatePassword"
-				>
-					<Shield className="mr-1.5 h-4 w-4" /> Generate Random Password
-				</Button>
+					variant="primary"
+					label={'Generate password'}
+					checked={generatePassword}
+					onClick={() => form.setValue('generate_password', !generatePassword)}
+					{...form.register('generate_password')}
+				/>
 			</div>
 		</div>
 	)
-}
-
-const generateRandomPassword = (length = 16) => {
-	// FIXME: this should probably be moved to the server and be a secret lol very insecure
-	const charset =
-		'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~}{[]:;?'
-	let randomValue = ''
-	for (let i = 0, n = charset.length; i < length; ++i) {
-		randomValue += charset.charAt(Math.floor(Math.random() * n))
-	}
-	return randomValue
 }

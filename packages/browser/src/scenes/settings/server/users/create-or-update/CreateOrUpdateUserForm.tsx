@@ -51,6 +51,7 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 		password,
 		permissions,
 		max_sessions_allowed,
+		generate_password,
 		...ageRestrictions
 	}: CreateOrUpdateUserSchema) => {
 		try {
@@ -61,11 +62,12 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 					}
 				: null
 
-			if (isCreating && password) {
+			if (isCreating && (password || generate_password)) {
 				await createAsync({
 					age_restriction,
 					max_sessions_allowed,
-					password: password,
+					password: password ?? '',
+					generate_password,
 					permissions,
 					username,
 				})

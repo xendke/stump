@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::{fs::File, io::Write};
 
 use axum::{
@@ -416,6 +417,7 @@ async fn update_preferences(
 pub struct CreateUser {
 	pub username: String,
 	pub password: String,
+	pub generate_password: bool,
 	#[serde(default)]
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<AgeRestriction>,
@@ -445,7 +447,23 @@ async fn create_user(
 
 	let db = &ctx.db;
 
-	let hashed_password = bcrypt::hash(input.password, ctx.config.password_hash_cost)?;
+	let mut password = input.password;
+
+	// TODO: clean this up
+	if input.generate_password {
+		let charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~}{[]:;?";
+		let mut rng = rand::thread_rng();
+		let mut random_value = String::with_capacity(16);
+
+		for _ in 0..16 {
+			let random_index = rng.gen_range(0..charset.len());
+			random_value.push(charset.chars().nth(random_index).unwrap());
+		}
+
+		password = random_value;
+	}
+
+	let hashed_password = bcrypt::hash(password, ctx.config.password_hash_cost)?;
 
 	// TODO: https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let created_user = db

@@ -347,7 +347,7 @@ export type LoginResponse = User | { for_user: User; token: CreatedToken }
 
 export type LoginOrRegisterArgs = { username: string; password: string }
 
-export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
+export type CreateUser = { username: string; password: string; generate_password: boolean; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
 export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 

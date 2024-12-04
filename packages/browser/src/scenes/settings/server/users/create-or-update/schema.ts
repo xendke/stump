@@ -35,51 +35,52 @@ export const buildSchema = (
 	existingUsers: User[],
 	editingUser?: User,
 ) =>
-	z.object({
-		age_restriction: z
-			.number()
-			.optional()
-			.refine((value) => value == undefined || value >= 0, {
-				message: t('settingsScene.server/users.createOrUpdateForm.validation.ageRestrictionTooLow'),
-			}),
-		age_restriction_on_unset: z.boolean().optional(),
-		forbidden_tags: z.array(z.string()).optional(),
-		max_sessions_allowed: z
-			.number()
-			.optional()
-			.refine((value) => value == undefined || value >= 0, {
-				message: t(
-					'settingsScene.server/users.createOrUpdateForm.validation.maxSessionsAllowedTooLow',
-				),
-			}),
-		password: z
-			.string()
-			// .min(1, { message: t('authScene.form.validation.missingPassword') })
-			.optional()
-			.refine(
-				// if we are updating a user, we don't need to validate the password
-				(value) => !!editingUser || !!value,
-				() => ({ message: t('authScene.form.validation.missingPassword') }),
-			),
-		permissions: z
-			.array(userPermissionSchema)
-			.optional()
-			.default(editingUser?.permissions ?? []),
-		username: z
-			.string()
-			.min(1, { message: t('authScene.form.validation.missingUsername') })
-			.refine(
-				(value) =>
-					(!!editingUser && value === editingUser.username) ||
-					existingUsers.every((user) => user.username !== value),
-				() => ({
+	z
+		.object({
+			age_restriction: z
+				.number()
+				.optional()
+				.refine((value) => value == undefined || value >= 0, {
 					message: t(
-						'settingsScene.server/users.createOrUpdateForm.validation.usernameAlreadyExists',
+						'settingsScene.server/users.createOrUpdateForm.validation.ageRestrictionTooLow',
 					),
 				}),
-			)
-			.default(editingUser?.username ?? ''),
-	})
+			age_restriction_on_unset: z.boolean().optional(),
+			forbidden_tags: z.array(z.string()).optional(),
+			max_sessions_allowed: z
+				.number()
+				.optional()
+				.refine((value) => value == undefined || value >= 0, {
+					message: t(
+						'settingsScene.server/users.createOrUpdateForm.validation.maxSessionsAllowedTooLow',
+					),
+				}),
+			password: z.string().optional(),
+			generate_password: z.boolean(),
+			permissions: z
+				.array(userPermissionSchema)
+				.optional()
+				.default(editingUser?.permissions ?? []),
+			username: z
+				.string()
+				.min(1, { message: t('authScene.form.validation.missingUsername') })
+				.refine(
+					(value) =>
+						(!!editingUser && value === editingUser.username) ||
+						existingUsers.every((user) => user.username !== value),
+					() => ({
+						message: t(
+							'settingsScene.server/users.createOrUpdateForm.validation.usernameAlreadyExists',
+						),
+					}),
+				)
+				.default(editingUser?.username ?? ''),
+		})
+		.refine(
+			// if we are updating a user or generating a password, we don't need to validate the password
+			(data) => !!editingUser || !!data.password || !!data.generate_password,
+			() => ({ message: t('authScene.form.validation.missingPassword'), path: ['password'] }),
+		)
 export type CreateOrUpdateUserSchema = z.infer<ReturnType<typeof buildSchema>>
 
 export const formDefaults = (editingUser?: User): CreateOrUpdateUserSchema => ({
@@ -88,4 +89,5 @@ export const formDefaults = (editingUser?: User): CreateOrUpdateUserSchema => ({
 	max_sessions_allowed: editingUser?.max_sessions_allowed ?? undefined,
 	permissions: editingUser?.permissions ?? [],
 	username: editingUser?.username ?? '',
+	generate_password: false,
 })
